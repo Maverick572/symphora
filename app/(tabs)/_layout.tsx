@@ -1,35 +1,68 @@
+// (tabs)/_layout.tsx
+import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import React from 'react';
+import { StyleSheet, View } from 'react-native';
+import * as SplashScreen from 'expo-splash-screen';
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+const tabcolor = "#2e2822";
+SplashScreen.preventAutoHideAsync();
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
+export default function TabsLayout() {
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+    <View style={styles.container}>
+      <Tabs
+        screenOptions={{
+          animation: 'none',
+          headerStyle: {
+            backgroundColor: tabcolor,
+            borderBottomColor: '#d6bfa1',
+            borderBottomWidth: 3,
+          },
+          headerTintColor: '#d6bfa1',
+          headerTitleAlign: 'center',
+          headerTitleStyle: { fontFamily: 'Cinzel', fontSize: 30, color: '#d6bfa1' },
+          tabBarActiveTintColor: '#FF8C00',
+          tabBarInactiveTintColor: '#aaa',
+          tabBarLabelStyle: { fontFamily: 'Cinzel', fontSize: 12 },
+          tabBarStyle: {
+            backgroundColor: tabcolor,
+            borderTopWidth: 3,
+            borderColor: '#d6bfa1',
+            height: 80,
+            paddingBottom: 8,
+            paddingTop: 10,
+          },
+          
         }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
-    </Tabs>
+      >
+        <Tabs.Screen
+          name="folders"
+          options={{
+            title: 'Symphony Vault',
+            tabBarLabel: 'Recordings',
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="musical-notes" size={size} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="profile"
+          options={{
+            title: 'Harmony Sanctum',
+            tabBarLabel: 'Profile',
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="person-circle" size={size} color={color} />
+            ),
+          }}
+        />
+      </Tabs>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#403932'
+  },
+});
