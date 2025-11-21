@@ -31,8 +31,6 @@ export default function RootLayout() {
     <Stack screenOptions={{
           headerShown: false,
           contentStyle: { backgroundColor: '#403932' },  // Your main BG color
-          animation: 'none',
-          animationTypeForReplace: 'pop',
         }}>
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="set-pin" options={{ headerShown: false}} />

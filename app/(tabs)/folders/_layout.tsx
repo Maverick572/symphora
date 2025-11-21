@@ -9,7 +9,6 @@ export default function FoldersLayout() {
     <Stack screenOptions={{
           headerShown: false,
           contentStyle: { backgroundColor: '#403932' },  // Your main BG color
-          animation: 'none',
         }}>
       <Stack.Screen name="instrument" />
       <Stack.Screen name="piece" />

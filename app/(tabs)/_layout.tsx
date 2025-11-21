@@ -12,7 +12,6 @@ export default function TabsLayout() {
     <View style={styles.container}>
       <Tabs
         screenOptions={{
-          animation: 'none',
           headerStyle: {
             backgroundColor: tabcolor,
             borderBottomColor: '#d6bfa1',
