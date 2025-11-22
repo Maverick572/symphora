@@ -45,12 +45,12 @@ export default function TabsLayout() {
           }}
         />
         <Tabs.Screen
-          name="profile"
+          name="settings"
           options={{
             title: 'Harmony Sanctum',
-            tabBarLabel: 'Profile',
+            tabBarLabel: 'Settings',
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name="person-circle" size={size} color={color} />
+              <Ionicons name="settings" size={size} color={color} />
             ),
           }}
         />

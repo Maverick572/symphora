@@ -1,5 +1,6 @@
 // src/screens/RecordingsFolder.tsx
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Slider from '@react-native-community/slider';
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system/legacy';
@@ -172,19 +173,79 @@ export default function RecordingsFolder() {
   // -----------------------------------------------------------------
   // Recording flow
   // -----------------------------------------------------------------
-  const startRecording = async () => {
-    const { granted } = await Audio.requestPermissionsAsync();
-    if (!granted) {
-      Alert.alert('Permission', 'Microphone access required.');
-      return;
-    }
-    const { recording } = await Audio.Recording.createAsync(
-      Audio.RecordingOptionsPresets.HIGH_QUALITY
-    );
-    setRecording(recording);
-    setIsPaused(false);
-    setRecordingModalVisible(true);
-  };
+const startRecording = async () => {
+  // Permissions
+  const { granted } = await Audio.requestPermissionsAsync();
+  if (!granted) {
+    Alert.alert('Permission', 'Microphone access required.');
+    return;
+  }
+
+  // Load selected quality
+  let quality = await AsyncStorage.getItem("recording_quality");
+  if (!quality) quality = "medium"; // fallback
+
+  // Choose audio config
+  let options: Audio.RecordingOptions;
+
+  if (quality === "high") {
+    console.log("⚙ Using HIGH preset (WAV)");
+    options = Audio.RecordingOptionsPresets.HIGH_QUALITY;
+  } 
+  else if (quality === "low") {
+    console.log("⚙ Using LOW preset (AAC)");
+    options = {
+      android: {
+        extension: '.aac',
+        outputFormat: Audio.AndroidOutputFormat.AAC_ADTS,
+        audioEncoder: Audio.AndroidAudioEncoder.AAC,
+        sampleRate: 32000,
+        numberOfChannels: 1,
+        bitRate: 64000,
+      },
+      ios: {
+        extension: '.aac',
+        audioQuality: Audio.IOSAudioQuality.LOW,
+        sampleRate: 32000,
+        numberOfChannels: 1,
+        bitRate: 64000,
+        outputFormat: Audio.IOSOutputFormat.MPEG4AAC,
+      },
+      web: {}  
+    };
+  }
+  else {
+    // MEDIUM
+    console.log("⚙ Using MEDIUM preset (M4A)");
+    options = {
+      android: {
+        extension: '.m4a',
+        outputFormat: Audio.AndroidOutputFormat.MPEG_4,
+        audioEncoder: Audio.AndroidAudioEncoder.AAC,
+        sampleRate: 44100,
+        numberOfChannels: 2,
+        bitRate: 128000,
+      },
+      ios: {
+        extension: '.m4a',
+        audioQuality: Audio.IOSAudioQuality.MEDIUM,
+        sampleRate: 44100,
+        numberOfChannels: 2,
+        bitRate: 128000,
+        outputFormat: Audio.IOSOutputFormat.MPEG4AAC,
+      },
+      web: {} 
+    };
+  }
+
+  // Start recording
+  const { recording } = await Audio.Recording.createAsync(options);
+
+  setRecording(recording);
+  setIsPaused(false);
+  setRecordingModalVisible(true);
+};
+
 
   const pauseResumeRecording = async () => {
     if (!recording) return;
@@ -197,31 +258,59 @@ export default function RecordingsFolder() {
     }
   };
 
-  const stopRecording = async () => {
-    if (!recording) return;
-    await recording.stopAndUnloadAsync();
-    const uri = recording.getURI();
-    if (uri) {
-      const ts = new Date()
-        .toISOString()
-        .replace(/[:.]/g, '-')
-        .split('Z')[0];
-      const fileName = `recording-${ts}.m4a`;
-      const dest = `${FileSystem.documentDirectory}recordings/${decodedInstrument}/${decodedPiece}/${fileName}`;
-      await FileSystem.makeDirectoryAsync(
-        `${FileSystem.documentDirectory}recordings/${decodedInstrument}/${decodedPiece}`,
-        { intermediates: true }
-      );
-      await FileSystem.moveAsync({ from: uri, to: dest });
+const stopRecording = async () => {
+  if (!recording) return;
 
-      // Refresh list
-      const files = await getAudioFiles(decodedInstrument, decodedPiece);
-      setItems(files);
-    }
-    setRecording(null);
-    setRecordingModalVisible(false);
-    setIsPaused(false);
-  };
+  // Stop and unload
+  await recording.stopAndUnloadAsync();
+  const uri = recording.getURI();
+
+  if (uri) {
+    // Load chosen quality
+    let quality = await AsyncStorage.getItem("recording_quality");
+    if (!quality) quality = "medium";
+
+    // Extension based on quality
+    let ext = "m4a";
+    if (quality === "high") ext = "wav";
+    if (quality === "low") ext = "aac";
+
+    // Timestamp
+    const ts = new Date()
+      .toISOString()
+      .replace(/[:.]/g, '-')
+      .split('Z')[0];
+
+    // Final filename
+    const fileName = `recording-${ts}.${ext}`;
+
+    // Final destination
+    const dest = `${FileSystem.documentDirectory}recordings/${decodedInstrument}/${decodedPiece}/${fileName}`;
+
+    console.log("📁 Saving file:");
+    console.log("   from:", uri);
+    console.log("   to:", dest);
+
+    // Ensure directory exists
+    await FileSystem.makeDirectoryAsync(
+      `${FileSystem.documentDirectory}recordings/${decodedInstrument}/${decodedPiece}`,
+      { intermediates: true }
+    );
+
+    // Move (rename)
+    await FileSystem.moveAsync({ from: uri, to: dest });
+
+    // Refresh list
+    const files = await getAudioFiles(decodedInstrument, decodedPiece);
+    setItems(files);
+  }
+
+  // Reset UI
+  setRecording(null);
+  setRecordingModalVisible(false);
+  setIsPaused(false);
+};
+
 
   const cancelRecording = async () => {
     if (recording) await recording.stopAndUnloadAsync();

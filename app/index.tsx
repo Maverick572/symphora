@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { Animated, Image, StyleSheet, Text } from 'react-native';
 
 export const options = { headerShown: false };
@@ -8,7 +8,6 @@ export const options = { headerShown: false };
 export default function HomeScreen() {
   const router = useRouter();
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const [imagesLoaded, setImagesLoaded] = useState(0);
 
 
   useEffect(() => { const run = async () => {
