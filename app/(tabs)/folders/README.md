@@ -1,7 +1,5 @@
 # Symphora
 
-![Status](https://img.shields.io/badge/Status-Complete-brightgreen)
-
 An elegant mobile application designed for musicians to organize, manage, and browse their practice recordings through a structured and visually appealing interface.
 
 Symphora helps musicians maintain a personal archive of recordings by organizing practice sessions across instruments, musical pieces, and recordings, making it easier to track progress and revisit performances over time.
